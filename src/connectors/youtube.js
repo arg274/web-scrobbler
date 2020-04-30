@@ -71,7 +71,7 @@ Connector.getTimeInfo = () => {
 };
 
 Connector.isPlaying = () => {
-	return $('.html5-video-player').hasClass('playing-mode');
+	return Util.hasElementClass('.html5-video-player', 'playing-mode');
 };
 
 Connector.getUniqueID = () => {
@@ -80,18 +80,16 @@ Connector.getUniqueID = () => {
 	 * if the miniplayer is visible, so we should check
 	 * if URL of a current video in miniplayer is accessible.
 	 */
-	const miniPlayerVideoUrl = $('ytd-miniplayer[active] [selected] a').attr(
-		'href'
-	);
+	const miniPlayerVideoUrl = Util.getAttrFromSelectors('ytd-miniplayer[active] [selected] a', 'href');
 	if (miniPlayerVideoUrl) {
 		return Util.getYtVideoIdFromUrl(miniPlayerVideoUrl);
 	}
 
-	return $('ytd-watch-flexy').attr('video-id');
+	return Util.getAttrFromSelectors('ytd-watch-flexy', 'video-id');
 };
 
 Connector.isScrobblingAllowed = () => {
-	if ($('.ad-showing').length > 0) {
+	if (document.querySelector('.ad-showing') !== null) {
 		return false;
 	}
 
@@ -119,7 +117,11 @@ Connector.isScrobblingAllowed = () => {
 Connector.applyFilter(MetadataFilter.getYoutubeFilter());
 
 function setupEventListener() {
-	$(videoSelector).on('timeupdate', Connector.onStateChanged);
+	// TODO Add MutationObserver
+	const videoElement = document.querySelector(videoSelector);
+	if (videoElement) {
+		videoElement.addEventListener('timeupdate', Connector.onStateChanged);
+	}
 }
 
 function areChaptersMissing() {
@@ -201,7 +203,7 @@ async function readConnectorOptions() {
 }
 
 function getVideoDescription() {
-	return $('#description').text();
+	return Util.getTextFromSelectors('#description');
 }
 
 function getTrackInfoFromDescription() {
