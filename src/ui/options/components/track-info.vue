@@ -1,10 +1,8 @@
-<template>
+<template functional>
 	<div class="mb-2">
-		<div class="artist-track">
-			{{ artist }} — {{ track }}
-		</div>
-		<div class="album" v-if="album">
-			{{ L('albumTooltip', album) }}
+		<div class="artist-track">{{ props.artist }} — {{ props.track }}</div>
+		<div class="album" v-if="props.album">
+			{{ parent.L('albumTooltip', props.album) }}
 		</div>
 	</div>
 </template>
