@@ -183,17 +183,12 @@
 </template>
 
 <script>
-import { runtime } from 'webextension-polyfill';
+import { browser } from 'webextension-polyfill-ts';
 
 import Song from '@/background/object/song';
 import {
-	EVENT_TRACK_UPDATED,
-	REQUEST_CORRECT_TRACK,
-	REQUEST_GET_CONNECTOR_LABEL,
-	REQUEST_GET_TRACK,
-	REQUEST_RESET_TRACK,
-	REQUEST_SKIP_TRACK,
-	REQUEST_TOGGLE_LOVE,
+	Event,
+	Request,
 	sendMessageToActiveTab,
 } from '@/common/messages';
 
@@ -238,15 +233,14 @@ export default {
 		};
 	},
 	created() {
-		runtime.onMessage.addListener((message) => {
-			if (message.type !== EVENT_TRACK_UPDATED) {
+		browser.runtime.onMessage.addListener((message) => {
+			if (message.type !== Event.TrackUpdated) {
 				return;
 			}
-
 			this.updateCurrentTrack(message.data.track);
 		});
 
-		sendMessageToActiveTab(REQUEST_GET_TRACK).then((track) => {
+		sendMessageToActiveTab(Request.GetTrack).then((track) => {
 			this.updateCurrentTrack(track);
 		});
 	},
@@ -267,15 +261,15 @@ export default {
 		},
 
 		resetTrack() {
-			sendMessageToActiveTab(REQUEST_RESET_TRACK);
+			sendMessageToActiveTab(Request.ResetTrack);
 		},
 
 		skipTrack() {
-			sendMessageToActiveTab(REQUEST_SKIP_TRACK);
+			sendMessageToActiveTab(Request.SkipTrack);
 		},
 
 		setTrackLoved(isLoved) {
-			sendMessageToActiveTab(REQUEST_TOGGLE_LOVE, { isLoved });
+			sendMessageToActiveTab(Request.ToggleLove, { isLoved });
 		},
 
 		swapArtistAndTrack() {
@@ -296,7 +290,7 @@ export default {
 			for (const field of Song.BASE_FIELDS) {
 				track[field] = this[field];
 			}
-			sendMessageToActiveTab(REQUEST_CORRECT_TRACK, { track });
+			sendMessageToActiveTab(Request.CorrectTrack, { track });
 		},
 
 		/** Controls */
@@ -380,7 +374,7 @@ export default {
 		async updateCurrentTrack(clonedData) {
 			this.song = Song.wrap(clonedData);
 			this.label = await sendMessageToActiveTab(
-				REQUEST_GET_CONNECTOR_LABEL
+				Request.GetConnectorLabel
 			);
 
 			if (this.song.isValid() || this.song.flags.isSkipped) {
